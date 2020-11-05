@@ -2,6 +2,7 @@
 import $ from 'jquery'
 import * as signalR from '@microsoft/signalr'
 
+
 let roomId = location.pathname.substring(1)
 
 async function validate(){
@@ -9,14 +10,20 @@ async function validate(){
     if (isNaN(id)) {
         throw error('this is not living room')
     }
+    const userIdReg = /\/\/space\.bilibili\.com\/(?<id>\d+)\//g
+    const roomLink = $('a.room-cover.dp-i-block.p-relative.bg-cover').attr('href')
+    const userId = parseInt(userIdReg.exec(roomLink).groups.id)
     console.log('fetching vup api')
     const data = await fetch('https://vup.darkflame.ga/api/online').then(r => r.json())
     console.log('fetched successful')
-    const roomIds = data.list.map(s => s.roomId)
-    return roomIds.includes(id)
+    const roomIdVup = data.list.find(s => s.uid === userId)?.roomId
+    if (roomIdVup && roomIdVup !== roomId){
+        console.log(`roomId from url (${roomId}) is not match as roomId in vup.darkflame.ga (${roomIdVup}), gonna use roomId from vup.darkflame.ga`)
+        roomId = roomIdVup
+        return true
+    }
+    return false
 }
-
-
 
 
 function insertViewerDom(){

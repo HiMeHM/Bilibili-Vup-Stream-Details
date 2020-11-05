@@ -1,5 +1,5 @@
 env:
-    version: 1.0.3
+    version: 1.0.3.1
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
 name: Publish for this firefox extension

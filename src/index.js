@@ -16,10 +16,12 @@ async function validate(){
     console.log('fetching vup api')
     const data = await fetch('https://vup.darkflame.ga/api/online').then(r => r.json())
     console.log('fetched successful')
-    const roomIdVup = data.list.find(s => s.uid === userId)?.roomId
-    if (roomIdVup && roomIdVup !== roomId){
-        console.log(`roomId from url (${roomId}) is not match as roomId in vup.darkflame.ga (${roomIdVup}), gonna use roomId from vup.darkflame.ga`)
-        roomId = roomIdVup
+    const roomIdVup = data.list.find(s => s.uid == userId)?.roomId
+    if (roomIdVup){
+        if(roomIdVup != roomId){
+            console.log(`roomId from url (${roomId}) is not match as roomId in vup.darkflame.ga (${roomIdVup}), gonna use roomId from vup.darkflame.ga`)
+            roomId = roomIdVup
+        }
         return true
     }
     return false

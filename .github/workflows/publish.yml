@@ -30,7 +30,7 @@ env:
         run: |
          npm install -g rollup
          npm install -g web-ext
-         npm init
+         npm install
          npm run build
       - name: web-ext sign package
         run: web-ext sign --source-dir ./dist -v

@@ -15,5 +15,7 @@ vup (virtual up) 虛擬主播
 
 in bilibili streaming
 
+從左邊到右邊: 人氣(最高人氣) | 已知互動人數 | 真實彈幕數(彈幕發言人數)
+
 ![showcase](https://i.gyazo.com/25317d7af527cdfa963ae95be2967bd1.gif)
 

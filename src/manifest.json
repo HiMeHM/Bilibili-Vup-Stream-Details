@@ -2,7 +2,7 @@
 
     "manifest_version": 2,
     "name": "Bilibili Vup Stream Details",
-    "version": "1.0.3",
+    "version": "1.0.3.1",
   
     "description": "check bilibili vup stream details, data grabing from vup.darkflame.ga",
   

@@ -1,0 +1,23 @@
+{
+
+    "manifest_version": 2,
+    "name": "Bilibili Vup Stream Details",
+    "version": "1.0.2",
+  
+    "description": "check bilibili vup stream details, data grabing from vup.darkflame.ga",
+  
+    "icons": {
+      "48": "icons/icon.png"
+    },
+    "permissions": [
+      "*://vup.darkflame.ga/*",
+      "webRequest"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["*://live.bilibili.com/*"],
+        "js": ["index.js"]
+      }
+    ]
+  
+  }

@@ -1,0 +1,28 @@
+{
+  "name": "bilibili-vtuber-stream-details",
+  "version": "1.0.2",
+  "description": "check bilibili vup stream viewers",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "clean": "rmdir /S /Q dist",
+    "build": "rollup -c",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@microsoft/signalr": "^3.1.9",
+    "install": "^0.13.0",
+    "jquery": "^3.5.1",
+    "npm": "^6.14.8"
+  },
+  "devDependencies": {
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-copy": "^3.3.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}

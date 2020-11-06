@@ -14,7 +14,18 @@ async function validate(){
     const roomLink = $('a.room-cover.dp-i-block.p-relative.bg-cover').attr('href')
     const userId = parseInt(userIdReg.exec(roomLink).groups.id)
     console.log('fetching vup api')
-    const data = await fetch('https://vup.darkflame.ga/api/online').then(r => r.json())
+    let data;
+    try{
+        const res = await fetch('https://vup.darkflame.ga/api/online')
+        if (!res.ok) throw new Error(`${res.statusText} (${res.status})`)
+        data = await res.json()
+    }catch(err){
+        console.error('error while fetching vup list: '+err);
+        console.log('reconnecting after 5 secs')
+        setTimeout(start, 5000)
+        return false;
+    }
+   
     console.log('fetched successful')
     const roomIdVup = data.list.find(s => s.uid == userId)?.roomId
     if (roomIdVup){
@@ -77,9 +88,15 @@ async function startVupSignalR(){
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets
     })
-    .withAutomaticReconnect([1000, 5000, 10000])
+    .withAutomaticReconnect()
     .build();
-    await connection.start();
+    try{
+        await connection.start();
+    }catch(err){
+        console.log(`error while connecting to signalR: ${err}`)
+        setTimeout(startVupSignalR, 2000)
+        return
+    }
     console.log('signalR connected.')
     connection.on("ReceiveRoomData", (_, data) => {
         display.setViewer(data.participants)
@@ -87,11 +104,15 @@ async function startVupSignalR(){
         display.setDanmakuViewer(data.danmakuUser)
         display.setHighestPopular(data.maxPopularity)
     });
-    connection.onclose(err => {
-        console.warn(`web socket closed: ${err}`)
+    connection.onclose(() => {
+        console.warn(`web socket closed abnormally, reconnecting...`)
+        setTimeout(startVupSignalR(), 2000)
     })
-    connection.onreconnected(() => console.log(`websocket reconnected...`))
-    connection.onreconnecting(() => console.log(`websocket reconnecting...`))
+    connection.onreconnected(() => console.log(`websocket reconnected.`))
+    connection.onreconnecting(error => {
+        if (error) console.log(`encountered error: ${error}`)
+        console.log(`websocket reconnecting...`)
+    })
 }
 
 

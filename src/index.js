@@ -5,14 +5,24 @@ import * as signalR from '@microsoft/signalr'
 
 let roomId = location.pathname.substring(1)
 
+console.log('bilibili vup stream details is enabled on this page.')
+
 async function validate(){
     const id = parseInt(roomId)
     if (isNaN(id)) {
-        throw error('this is not living room')
+        throw new Error('this is not living room')
     }
     const userIdReg = /\/\/space\.bilibili\.com\/(?<id>\d+)\//g
     const roomLink = $('a.room-cover.dp-i-block.p-relative.bg-cover').attr('href')
-    const userId = parseInt(userIdReg.exec(roomLink).groups.id)
+    const userId = parseInt(userIdReg.exec(roomLink)?.groups?.id)
+    let detection;
+    if (isNaN(userId)){
+        console.log(`cannot get the userId from the page, using roomId(${id}) for detection.`)
+        detection = (s) => s.uid == userId
+    }else{
+        console.log(`successfully get the userId, using userId(${userId}) for detection.`)
+        detection = (s) => s.roomId == id
+    }
     console.log('fetching vup api')
     let data;
     try{
@@ -20,14 +30,13 @@ async function validate(){
         if (!res.ok) throw new Error(`${res.statusText} (${res.status})`)
         data = await res.json()
     }catch(err){
-        console.error('error while fetching vup list: '+err);
-        console.log('reconnecting after 5 secs')
-        setTimeout(start, 5000)
-        return false;
+        console.warn(`error while fetching vup api: ${err}`)
+        console.warn('restart after 5 secs')
+        await new Promise((res,) => setTimeout(res, 5000))
+        return await validate()
     }
-   
     console.log('fetched successful')
-    const roomIdVup = data.list.find(s => s.uid == userId)?.roomId
+    const roomIdVup = data.list.find(detection)?.roomId
     if (roomIdVup){
         if(roomIdVup != roomId){
             console.log(`roomId from url (${roomId}) is not match as roomId in vup.darkflame.ga (${roomIdVup}), gonna use roomId from vup.darkflame.ga`)
@@ -119,7 +128,7 @@ async function startVupSignalR(){
 
 async function start(){
     if (!await validate()) {
-        console.log('this live room is not virtual up, skipped')
+        console.log('this live room is not virtual up or not broadcasting now, skipped')
     }else{
         console.log('this live room is virtual up, using vup.darkflame.ga')
         insertViewerDom()
@@ -127,7 +136,7 @@ async function start(){
     }
 }
 
-start().catch(err=>console.warn(`error happened: ${err}`))
+start().catch(err => console.warn(err.message))
 
 
 

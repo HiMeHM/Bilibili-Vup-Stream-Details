@@ -1,5 +1,5 @@
 env:
-    version: 1.0.5
+    version: 1.0.6
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
 name: Publish for this firefox extension
@@ -45,7 +45,7 @@ jobs:
       with:
         tag_name: ${{ env.version }}
         release_name: Release ${{ github.repository }}-${{ env.version }}
-        body: nothing to show
+        body: check the commits for update
         draft: false
         prerelease: false
     - name: Upload Release jar

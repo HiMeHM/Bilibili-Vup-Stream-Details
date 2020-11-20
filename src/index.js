@@ -2,7 +2,7 @@ import $ from 'jquery'
 import * as signalR from '@microsoft/signalr'
 
 const roomReg = /^\/(?<id>\d+)/g
-const roomId = parseInt(roomReg.exec(location.pathname)?.groups?.id)
+let roomId = parseInt(roomReg.exec(location.pathname)?.groups?.id)
 
 const userIdReg = /\/\/space\.bilibili\.com\/(?<id>\d+)\//g
 
@@ -25,10 +25,10 @@ async function validate(){
     let detection;
     if (isNaN(userId)){
         console.log(`cannot get the userId from the page, using roomId(${roomId}) for detection.`)
-        detection = (s) => s.uid == userId
+        detection = (s) => s.roomId == roomId || s.shortId == roomId
     }else{
         console.log(`successfully get the userId, using userId(${userId}) for detection.`)
-        detection = (s) => s.roomId == roomId
+        detection = (s) => s.uid == userId
     }
     console.log('fetching vup api')
     let data;
@@ -118,8 +118,8 @@ async function startVupSignalR(){
         await connection.start();
     }catch(err){
         console.log(`error while connecting to signalR: ${err}`)
-        setTimeout(startVupSignalR, 2000)
-        return
+        await sleep(2000)
+        return await startVupSignalR()
     }
     console.log('signalR connected.')
     connection.on("ReceiveRoomData", (_, data) => {
@@ -148,7 +148,7 @@ async function start(){
     }
 }
 
-start().catch(err => console.warn(err.message))
+start().catch(err => console.error(err.message))
 
 
 

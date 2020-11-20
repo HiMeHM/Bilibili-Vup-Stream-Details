@@ -1,27 +1,34 @@
-'use strict';
 import $ from 'jquery'
 import * as signalR from '@microsoft/signalr'
 
+const roomReg = /^\/(?<id>\d+)/g
+const roomId = parseInt(roomReg.exec(location.pathname)?.groups?.id)
 
-let roomId = location.pathname.substring(1)
+const userIdReg = /\/\/space\.bilibili\.com\/(?<id>\d+)\//g
 
 console.log('bilibili vup stream details is enabled on this page.')
 
 async function validate(){
-    const id = parseInt(roomId)
-    if (isNaN(id)) {
+    if (isNaN(roomId)) {
         throw new Error('this is not living room')
     }
-    const userIdReg = /\/\/space\.bilibili\.com\/(?<id>\d+)\//g
-    const roomLink = $('a.room-cover.dp-i-block.p-relative.bg-cover').attr('href')
-    const userId = parseInt(userIdReg.exec(roomLink)?.groups?.id)
+    const roomLink =  $('a.room-cover.dp-i-block.p-relative.bg-cover').attr('href')
+    let uid;
+    if (!roomLink){
+        console.log('this is theme living room, using alternal uid fetching way')
+        //throw new Error('this web extension is not support theme room, sorry')
+        uid = $('div.activity-follow').attr('data-uid')
+    }else{
+        uid = userIdReg.exec(roomLink)?.groups?.id
+    }
+    const userId = parseInt(uid)
     let detection;
     if (isNaN(userId)){
-        console.log(`cannot get the userId from the page, using roomId(${id}) for detection.`)
+        console.log(`cannot get the userId from the page, using roomId(${roomId}) for detection.`)
         detection = (s) => s.uid == userId
     }else{
         console.log(`successfully get the userId, using userId(${userId}) for detection.`)
-        detection = (s) => s.roomId == id
+        detection = (s) => s.roomId == roomId
     }
     console.log('fetching vup api')
     let data;
@@ -32,7 +39,7 @@ async function validate(){
     }catch(err){
         console.warn(`error while fetching vup api: ${err}`)
         console.warn('restart after 5 secs')
-        await new Promise((res,) => setTimeout(res, 5000))
+        await sleep(5000)
         return await validate()
     }
     console.log('fetched successful')
@@ -48,8 +55,16 @@ async function validate(){
 }
 
 
+async function sleep(ms){
+    return new Promise((res,) => setTimeout(res, ms))
+}
+
+
 function insertViewerDom(){
     const ele = $('div.upper-right-ctnr.p-absolute.none-select')
+    if ((ele?.length ?? 0) === 0){
+        throw Error('theme room is not supported. cannot insert element.')
+    }
     ele.append(`
         <div style="color: gray" title="已知互動人數" class="right-action-ctnr dp-i-block">
             <i class="icon-font icon-view live-skin-normal-text v-middle"></i>
@@ -114,8 +129,7 @@ async function startVupSignalR(){
         display.setHighestPopular(data.maxPopularity)
     });
     connection.onclose(() => {
-        console.warn(`web socket closed abnormally, reconnecting...`)
-        setTimeout(startVupSignalR(), 2000)
+        console.warn(`web socket closed abnormally.`)
     })
     connection.onreconnected(() => console.log(`websocket reconnected.`))
     connection.onreconnecting(error => {
@@ -123,8 +137,6 @@ async function startVupSignalR(){
         console.log(`websocket reconnecting...`)
     })
 }
-
-
 
 async function start(){
     if (!await validate()) {

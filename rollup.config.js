@@ -28,6 +28,6 @@ export default {
                 { src: 'src/icons/*', dest: 'dist/icons'}
             ]
         }),
-        //terser()
+        terser()
       ]
   };

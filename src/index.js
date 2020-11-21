@@ -1,10 +1,12 @@
-import $ from 'jquery'
+import $$ from 'jquery'
 import * as signalR from '@microsoft/signalr'
 
 const roomReg = /^\/(?<id>\d+)/g
 let roomId = parseInt(roomReg.exec(location.pathname)?.groups?.id)
 
 const userIdReg = /\/\/space\.bilibili\.com\/(?<id>\d+)\//g
+
+let $ = $$
 
 console.log('bilibili vup stream details is enabled on this page.')
 
@@ -60,10 +62,14 @@ async function sleep(ms){
 }
 
 
-function insertViewerDom(){
+async function insertViewerDom(){
     const ele = $('div.upper-right-ctnr.p-absolute.none-select')
     if ((ele?.length ?? 0) === 0){
-        throw Error('theme room is not supported. cannot insert element.')
+        //throw Error('theme room is not supported. cannot insert element.')
+        console.debug('the room is theme room, using alternative way to insert element.')
+        $ = (s) => $$($$("iframe")[1].contentWindow.document).find(s)
+        await sleep(300)
+        return await insertViewerDom()
     }
     ele.append(`
         <div style="color: gray" title="已知互動人數" class="right-action-ctnr dp-i-block">
@@ -143,7 +149,7 @@ async function start(){
         console.log('this live room is not virtual up or not broadcasting now, skipped')
     }else{
         console.log('this live room is virtual up, using vup.darkflame.ga')
-        insertViewerDom()
+        await insertViewerDom()
         await startVupSignalR()
     }
 }

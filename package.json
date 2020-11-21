@@ -1,6 +1,6 @@
 {
   "name": "bilibili-vtuber-stream-details",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "check bilibili vup stream viewers",
   "main": "index.js",
   "directories": {

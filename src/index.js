@@ -136,7 +136,7 @@ async function startVupSignalR(){
     });
     connection.onclose(() => {
         console.warn(`web socket closed abnormally. reconnting after 3 secs`)
-		sleep(3000).then(startVupSignalR).catch(err => console.error(err.message)
+		sleep(3000).then(startVupSignalR).catch(err => console.error(err.message))
     })
     connection.onreconnected(() => console.log(`websocket reconnected.`))
     connection.onreconnecting(error => {
